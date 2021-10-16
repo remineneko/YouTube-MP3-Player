@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\Users\remin\PycharmProjects\yt_mp3_player\assets\MainScreen.ui'
+# Form implementation generated from reading ui file 'C:\Users\remin\PycharmProjects\yt_mp3_player\YouTube-MP3-Player\assets\MainScreen.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(901, 548)
+        MainWindow.resize(900, 574)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.linkInput = QtWidgets.QLineEdit(self.centralwidget)
@@ -26,30 +26,27 @@ class Ui_MainWindow(object):
         self.LoadButton = QtWidgets.QPushButton(self.centralwidget)
         self.LoadButton.setGeometry(QtCore.QRect(770, 40, 101, 41))
         self.LoadButton.setObjectName("LoadButton")
-        self.textBrowser = QtWidgets.QTextBrowser(self.centralwidget)
-        self.textBrowser.setGeometry(QtCore.QRect(10, 90, 731, 411))
-        self.textBrowser.setObjectName("textBrowser")
         self.addButton = QtWidgets.QPushButton(self.centralwidget)
-        self.addButton.setGeometry(QtCore.QRect(770, 220, 101, 41))
+        self.addButton.setGeometry(QtCore.QRect(770, 280, 101, 41))
         self.addButton.setObjectName("addButton")
         self.removeButton = QtWidgets.QPushButton(self.centralwidget)
-        self.removeButton.setGeometry(QtCore.QRect(770, 280, 101, 41))
+        self.removeButton.setGeometry(QtCore.QRect(770, 340, 101, 41))
         self.removeButton.setObjectName("removeButton")
-        self.modifyButton = QtWidgets.QPushButton(self.centralwidget)
-        self.modifyButton.setGeometry(QtCore.QRect(770, 340, 101, 41))
-        self.modifyButton.setObjectName("modifyButton")
-        self.clearButton = QtWidgets.QPushButton(self.centralwidget)
-        self.clearButton.setGeometry(QtCore.QRect(770, 400, 101, 41))
-        self.clearButton.setObjectName("clearButton")
-        self.settingsButton = QtWidgets.QPushButton(self.centralwidget)
-        self.settingsButton.setGeometry(QtCore.QRect(770, 460, 101, 41))
-        self.settingsButton.setObjectName("settingsButton")
         self.playButton = QtWidgets.QPushButton(self.centralwidget)
         self.playButton.setGeometry(QtCore.QRect(770, 100, 101, 41))
         self.playButton.setObjectName("playButton")
-        self.downloadButton = QtWidgets.QPushButton(self.centralwidget)
-        self.downloadButton.setGeometry(QtCore.QRect(770, 160, 101, 41))
-        self.downloadButton.setObjectName("downloadButton")
+        self.saveButton = QtWidgets.QPushButton(self.centralwidget)
+        self.saveButton.setGeometry(QtCore.QRect(770, 160, 101, 41))
+        self.saveButton.setObjectName("saveButton")
+        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton.setGeometry(QtCore.QRect(770, 220, 101, 41))
+        self.pushButton.setObjectName("pushButton")
+        self.settingsButton = QtWidgets.QPushButton(self.centralwidget)
+        self.settingsButton.setGeometry(QtCore.QRect(770, 400, 101, 41))
+        self.settingsButton.setObjectName("settingsButton")
+        self.listWidget = QtWidgets.QListWidget(self.centralwidget)
+        self.listWidget.setGeometry(QtCore.QRect(10, 100, 731, 411))
+        self.listWidget.setObjectName("listWidget")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -65,11 +62,10 @@ class Ui_MainWindow(object):
         self.LoadButton.setText(_translate("MainWindow", "Load"))
         self.addButton.setText(_translate("MainWindow", "Add"))
         self.removeButton.setText(_translate("MainWindow", "Remove"))
-        self.modifyButton.setText(_translate("MainWindow", "Modify"))
-        self.clearButton.setText(_translate("MainWindow", "Clear"))
-        self.settingsButton.setText(_translate("MainWindow", "Settings"))
         self.playButton.setText(_translate("MainWindow", "Play"))
-        self.downloadButton.setText(_translate("MainWindow", "Download"))
+        self.saveButton.setText(_translate("MainWindow", "Save Playlist"))
+        self.pushButton.setText(_translate("MainWindow", "Load Playlist"))
+        self.settingsButton.setText(_translate("MainWindow", "Settings"))
 
 
 if __name__ == "__main__":
