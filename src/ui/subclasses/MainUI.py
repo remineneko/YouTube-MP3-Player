@@ -21,10 +21,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
 
     def url_loading(self, input_url):
         if not self.is_valid_youtube_url(input_url): # bilibili support will come later, please wait for it Rem :p
-            self.error_dialog = QtWidgets.QErrorMessage()
-            self.error_dialog.setWindowTitle('Warning')
-            self.error_dialog.showMessage('Please enter a valid YouTube video/playlist link.')
-            self.error_dialog.exec_()
+            QtWidgets.QMessageBox.warning(self.LoadButton,'Warning','Please put in a proper YouTube video/playlist url')
         else:
             self.load_worker = LoadWorker(input_url, self.storage)
             self.load_worker.finished.connect(self._update_view)
