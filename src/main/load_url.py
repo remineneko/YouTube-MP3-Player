@@ -17,7 +17,7 @@ class LoadURL:
     def _load_info(self):
         obtained_data : Dict = self.inst.extract_info(self._url, download = False)
         if self._url_type == 'video':
-            return obtained_data
+            return [obtained_data]
         else:
             return obtained_data['entries']
 
