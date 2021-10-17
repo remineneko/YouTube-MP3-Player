@@ -7,6 +7,7 @@ class AppStorage:
         self._given_url = None
         self._all_videos_info : List[Dict] = []
         self.config = self.load_config()
+        self.now_playing = []
 
     @property
     def url(self) -> str:
