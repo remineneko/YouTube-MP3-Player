@@ -7,6 +7,9 @@ from src.ui.subclasses import Player
 
 from src.main.load_url import LoadURL
 from src.main.storage import AppStorage
+from src.main.download_music import download_music
+
+from settings import *
 
 
 class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
@@ -55,9 +58,16 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
             self.play_popup.playAllButton.clicked.connect(lambda: self._play_all(self.popup_ui))
             self.popup_ui.exec_()
 
-        # open the play UI
+        # load the songs into a folder first
+
+        self.download_worker = DownloadWorker(self.storage)
+        self.download_worker.finished.connect(self._open_playUI)
+        self.download_worker.start()
+
+    def _open_playUI(self):
         self.play_music_UI = Player.Player(self.storage)
         self.play_music_UI.show()
+
 
     def _play_selected(self, dialog: QtWidgets.QDialog, chosen_songs):
         to_add = [i for i in self.storage.vid_info if i['title'] in [t.text() for t in chosen_songs]]
@@ -79,8 +89,34 @@ class LoadWorker(QtCore.QThread):
     def run(self):
         LoadURL(self.url, self.storage)
 
+
+class DownloadWorker(QtCore.QThread):
+    def __init__(self, storage):
+        super(DownloadWorker, self).__init__()
+        self.storage = storage
+
+    def run(self):
+        try:
+            download_music(info_list=self.storage.now_playing)
+        except Exception as e:
+            print(e)
+
+
 if __name__ == "__main__":
     new_storage = AppStorage()
+    from settings import *
+    data_dir = os.path.join(ROOT_FOLDER, 'data')
+    try:
+        os.mkdir(data_dir, mode= 0o777)
+    except FileExistsError:
+        pass
+
+    music_dir = os.path.join(data_dir,'now_playing')
+    try:
+        os.mkdir(music_dir,mode=0o777)
+    except FileExistsError:
+        pass
+
     import sys
 
     app = QtWidgets.QApplication(sys.argv)
