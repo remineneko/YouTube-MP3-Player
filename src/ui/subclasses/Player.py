@@ -43,6 +43,7 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
             else:
                 self.player.play()
                 self.pause_state = False
+                self.song_playing = True
 
         elif self.song_playing and len(selected_song_for_play) >= 1:
             chosen_song = [i.data(QtCore.Qt.UserRole) for i in selected_song_for_play]
