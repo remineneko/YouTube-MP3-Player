@@ -28,5 +28,4 @@ if __name__ == "__main__":
     playlist_url = "https://www.youtube.com/watch?v=O6vqvlHwkxk&list=PLj3JxVDwUCBlJEZ33x5vSjCCEnJImg1js"
     ns = AppStorage()
     LoadURL(norm_url, ns)
-    print(len(list(ns.vid_info[0].keys())))
     LoadURL(playlist_url, ns)

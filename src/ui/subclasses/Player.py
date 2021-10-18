@@ -22,7 +22,7 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
 
         for now_playing_item_index in range(len(self.storage.now_playing)):
             self.queueList.addItem(self.storage.now_playing[now_playing_item_index].title)
-            self.queueList.item(now_playing_item_index).setData(self.storage.now_playing[now_playing_item_index])
+            self.queueList.item(now_playing_item_index).setData(QtCore.Qt.UserRole, self.storage.now_playing[now_playing_item_index])
 
         self.player = QMediaPlayer(self)
         self.playButton.clicked.connect(self.play)

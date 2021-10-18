@@ -78,7 +78,6 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         dialog.close()
 
 
-
 class LoadWorker(QtCore.QThread):
     def __init__(self, url, storage):
         super(LoadWorker, self).__init__()
@@ -95,10 +94,7 @@ class DownloadWorker(QtCore.QThread):
         self.storage = storage
 
     def run(self):
-        try:
-            download_music(info_list=self.storage.now_playing)
-        except Exception as e:
-            print(e)
+        download_music(info_list=self.storage.now_playing)
 
 
 if __name__ == "__main__":

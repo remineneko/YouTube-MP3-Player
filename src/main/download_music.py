@@ -1,9 +1,11 @@
 from yt_dlp import YoutubeDL
-from typing import Dict
+from typing import List
 from settings import *
 from src.main.alter_title import alter_title
+from src.main.media_metadata import MediaMetadata
 
-def download_music(info_dict: Dict = None, info_list = None):
+
+def download_music(info_list : List[MediaMetadata] = None):
     params = {
         'format': 'bestaudio/best',
         'postprocessors': [{
@@ -16,14 +18,11 @@ def download_music(info_dict: Dict = None, info_list = None):
 
     with YoutubeDL(params) as ydl:
         if info_list is not None:
-            ydl.download([i['original_url'] for i in info_list if not _isExist(i)])
-        elif info_dict is not None:
-            if not _isExist(info_dict):
-                ydl.download([info_dict['original_url']])
+            ydl.download([i.original_url for i in info_list if not _isExist(i)])
 
 
-def _isExist(info_dict) -> bool:
-    res = os.path.isfile(os.path.join(MUSIC_FOLDER,'{}.mp3'.format(alter_title(info_dict['title']))))
+def _isExist(info_dict: MediaMetadata) -> bool:
+    res = os.path.isfile(os.path.join(MUSIC_FOLDER,'{}.mp3'.format(alter_title(info_dict.title))))
     return res
 
 

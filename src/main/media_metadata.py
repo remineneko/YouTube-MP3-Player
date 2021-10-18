@@ -1,5 +1,5 @@
 class MediaMetadata:
-    def __init__(self, info_dict:dict):
+    def __init__(self, info_dict: dict):
         '''
         Keeps track of the metadata of a YouTube video
         All keys:
@@ -14,64 +14,70 @@ class MediaMetadata:
         :param info_dict: The dictionary containing the metadata of the video
         '''
         self._full_info = info_dict
-        self.id = info_dict['id']
-        self.title = info_dict['title']
-        self.formats = info_dict['formats']
-        self.thumbnails = info_dict['thumbnails']
-        self.description = info_dict['description']
-        self.upload_date = info_dict['upload_date']
-        self.uploader = info_dict['uploader']
-        self.uploader_id = info_dict['uploader_id']
-        self.uploader_url = info_dict['uploader_url']
-        self.channel_id = info_dict['channel_id']
-        self.channel_url = info_dict['channel_url']
-        self.duration = info_dict['duration']
-        self.view_count = info_dict['view_count']
-        self.average_rating = info_dict['average_rating']
-        self.age_limit = info_dict['age_limit']
-        self.webpage_url = info_dict['webpage_url']
-        self.categories = info_dict['categories']
-        self.tags = info_dict['tags']
-        self.playable_in_embed = info_dict['playable_in_embed']
-        self.is_live = info_dict['is_live']
-        self.was_live = info_dict['was_live']
-        self.live_status = info_dict['live_status']
-        self.release_timestamp = info_dict['release_timestamp']
-        self.automatic_captions = info_dict['automatic_captions']
-        self.subtitles = info_dict['subtitles']
-        self.chapters = info_dict['chapters']
-        self.like_count = info_dict['like_count']
-        self.dislike_count = info_dict['dislike_count']
-        self.channel = info_dict['channel']
-        self.track = info_dict['track']
-        self.artist = info_dict['artist']
-        self.album = info_dict['album']
-        self.creator = info_dict['creator']
-        self.alt_title = info_dict['alt_title']
-        self.availability = info_dict['availability']
-        self.original_url = info_dict['original_url']
-        self.webpage_url_basename = info_dict['webpage_url_basename']
-        self.extractor = info_dict['extractor']
-        self.extractor_key = info_dict['extractor_key']
-        self.playlist = info_dict['playlist']
-        self.playlist_index = info_dict['playlist_index']
-        self.thumbnail = info_dict['thumbnail']
-        self.display_id = info_dict['display_id']
-        self.requested_subtitles = info_dict['requested_subtitles']
-        self.__has_drm = info_dict['__has_drm']
-        self.requested_formats = info_dict['requested_formats']
-        self.format = info_dict['format']
-        self.format_id = info_dict['format_id']
-        self.ext = info_dict['ext']
-        self.width = info_dict['width']
-        self.height = info_dict['height']
-        self.resolution = info_dict['resolution']
-        self.fps = info_dict['fps']
-        self.vcodec = info_dict['vcodec']
-        self.vbr = info_dict['vbr']
-        self.stretched_ratio = info_dict['stretched_ratio']
-        self.acodec = info_dict['acodec']
-        self.abr = info_dict['abr']
+        self.id = self._setup_variable('id')
+        self.title = self._setup_variable('title')
+        self.formats = self._setup_variable('formats')
+        self.thumbnails = self._setup_variable('thumbnails')
+        self.description = self._setup_variable('description')
+        self.upload_date = self._setup_variable('upload_date')
+        self.uploader = self._setup_variable('uploader')
+        self.uploader_id = self._setup_variable('uploader_id')
+        self.uploader_url = self._setup_variable('uploader_url')
+        self.channel_id = self._setup_variable('channel_id')
+        self.channel_url = self._setup_variable('channel_url')
+        self.duration = self._setup_variable('duration')
+        self.view_count = self._setup_variable('view_count')
+        self.average_rating = self._setup_variable('average_rating')
+        self.age_limit = self._setup_variable('age_limit')
+        self.webpage_url = self._setup_variable('webpage_url')
+        self.categories = self._setup_variable('categories')
+        self.tags = self._setup_variable('tags')
+        self.playable_in_embed = self._setup_variable('playable_in_embed')
+        self.is_live = self._setup_variable('is_live')
+        self.was_live = self._setup_variable('was_live')
+        self.live_status = self._setup_variable('live_status')
+        self.release_timestamp = self._setup_variable('release_timestamp')
+        self.automatic_captions = self._setup_variable('automatic_captions')
+        self.subtitles = self._setup_variable('subtitles')
+        self.chapters = self._setup_variable('chapters')
+        self.like_count = self._setup_variable('like_count')
+        self.dislike_count = self._setup_variable('dislike_count')
+        self.channel = self._setup_variable('channel')
+        self.track = self._setup_variable('track')
+        self.artist = self._setup_variable('artist')
+        self.album = self._setup_variable('album')
+        self.creator = self._setup_variable('creator')
+        self.alt_title = self._setup_variable('alt_title')
+        self.availability = self._setup_variable('availability')
+        self.original_url = self._setup_variable('original_url')
+        self.webpage_url_basename = self._setup_variable('webpage_url_basename')
+        self.extractor = self._setup_variable('extractor')
+        self.extractor_key = self._setup_variable('extractor_key')
+        self.playlist = self._setup_variable('playlist')
+        self.playlist_index = self._setup_variable('playlist_index')
+        self.thumbnail = self._setup_variable('thumbnail')
+        self.display_id = self._setup_variable('display_id')
+        self.requested_subtitles = self._setup_variable('requested_subtitles')
+        self.__has_drm = self._setup_variable('__has_drm')
+        self.requested_formats = self._setup_variable('requested_formats')
+        self.format = self._setup_variable('format')
+        self.format_id = self._setup_variable('format_id')
+        self.ext = self._setup_variable('ext')
+        self.width = self._setup_variable('width')
+        self.height = self._setup_variable('height')
+        self.resolution = self._setup_variable('resolution')
+        self.fps = self._setup_variable('fps')
+        self.vcodec = self._setup_variable('vcodec')
+        self.vbr = self._setup_variable('vbr')
+        self.stretched_ratio = self._setup_variable('stretched_ratio')
+        self.acodec = self._setup_variable('acodec')
+        self.abr = self._setup_variable('abr')
+
+    def _setup_variable(self, key):
+        try:
+            return self._full_info[key]
+        except KeyError:
+            return None
 
     def __str__(self):
         print(self._full_info)
