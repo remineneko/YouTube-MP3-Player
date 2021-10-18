@@ -65,8 +65,11 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self.download_worker.start()
 
     def _open_playUI(self):
-        self.play_music_UI = Player.Player(self.storage)
-        self.play_music_UI.show()
+        try:
+            self.play_music_UI = Player.Player(self.storage)
+            self.play_music_UI.show()
+        except Exception as e:
+            print(e)
 
     def _play_selected(self, dialog: QtWidgets.QDialog, chosen_songs):
         to_add = [i.data(QtCore.Qt.UserRole) for i in chosen_songs]
@@ -94,7 +97,10 @@ class DownloadWorker(QtCore.QThread):
         self.storage = storage
 
     def run(self):
-        download_music(info_list=self.storage.now_playing)
+        try:
+            download_music(info_list=self.storage.now_playing)
+        except Exception as e:
+            print(e)
 
 
 if __name__ == "__main__":
