@@ -1,13 +1,14 @@
 from typing import List, Dict
 import copy
+from src.main.media_metadata import MediaMetadata
 
 
 class AppStorage:
     def __init__(self):
         self._given_url = None
-        self._all_videos_info : List[Dict] = []
+        self._all_videos_info : List[MediaMetadata] = []
         self.config = self.load_config()
-        self.now_playing = []
+        self.now_playing : List[MediaMetadata] = []
 
     @property
     def url(self) -> str:
@@ -18,7 +19,7 @@ class AppStorage:
         self._given_url = new_url
 
     @property
-    def vid_info(self) -> List[Dict]:
+    def vid_info(self) -> List[MediaMetadata]:
         return copy.deepcopy(self._all_videos_info)
 
     @vid_info.setter

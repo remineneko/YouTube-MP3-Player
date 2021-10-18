@@ -1,7 +1,7 @@
 from yt_dlp import YoutubeDL
 from typing import Dict
 from settings import *
-
+from src.main.alter_title import alter_title
 
 def download_music(info_dict: Dict = None, info_list = None):
     params = {
@@ -24,12 +24,6 @@ def download_music(info_dict: Dict = None, info_list = None):
 
 def _isExist(info_dict) -> bool:
     res = os.path.isfile(os.path.join(MUSIC_FOLDER,'{}.mp3'.format(alter_title(info_dict['title']))))
-    print(res)
     return res
 
-def alter_title(title):
-    illegal = ["\\", ":", "<", ">", "\"", "/", "|", "?", "*"]
-    for restriction in illegal:
-        title = title.replace(restriction, "_")
-    print(title)
-    return title
+

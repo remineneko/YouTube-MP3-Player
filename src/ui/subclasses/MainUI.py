@@ -39,16 +39,16 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
 
     def _update_view(self):
         self.listWidget.clear()
-        self.listWidget.addItems([i['title'] for i in self.storage.vid_info])
+        for song_metadata_ind in range(len(self.storage.vid_info)):
+            self.listWidget.addItem(self.storage.vid_info[song_metadata_ind].title)
+            self.listWidget.item(song_metadata_ind).setData(QtCore.Qt.UserRole,self.storage.vid_info[song_metadata_ind])
 
     def playMusic(self):
         all_songs_chosen = self.listWidget.selectedItems()
         if len(all_songs_chosen) == 0:
             self.storage.now_playing = copy.deepcopy(self.storage.vid_info)
         elif len(all_songs_chosen) == 1:
-            # this is very unoptimized
-            # note to self: think of a different way to implement this
-            to_add = [i for i in self.storage.vid_info if i['title'] == all_songs_chosen[0].text()]
+            to_add = [i.data(QtCore.Qt.UserRole) for i in all_songs_chosen]
             self.storage.now_playing = copy.deepcopy(to_add)
         else:
             self.popup_ui = QtWidgets.QDialog()
@@ -68,9 +68,8 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self.play_music_UI = Player.Player(self.storage)
         self.play_music_UI.show()
 
-
     def _play_selected(self, dialog: QtWidgets.QDialog, chosen_songs):
-        to_add = [i for i in self.storage.vid_info if i['title'] in [t.text() for t in chosen_songs]]
+        to_add = [i.data(QtCore.Qt.UserRole) for i in chosen_songs]
         self.storage.now_playing.extend(to_add)
         dialog.close()
 
