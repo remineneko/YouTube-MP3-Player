@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_PlayerWindow(object):
     def setupUi(self, PlayerWindow):
         PlayerWindow.setObjectName("PlayerWindow")
-        PlayerWindow.resize(681, 445)
+        PlayerWindow.setFixedSize(681, 445)
         self.centralwidget = QtWidgets.QWidget(PlayerWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.playButton = QtWidgets.QPushButton(self.centralwidget)

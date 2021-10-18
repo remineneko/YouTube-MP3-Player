@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_PlayOptions(object):
     def setupUi(self, PlayOptions):
         PlayOptions.setObjectName("PlayOptions")
-        PlayOptions.resize(399, 162)
+        PlayOptions.setFixedSize(399, 162)
         self.playAllButton = QtWidgets.QPushButton(PlayOptions)
         self.playAllButton.setGeometry(QtCore.QRect(20, 20, 361, 51))
         self.playAllButton.setObjectName("playAllButton")
