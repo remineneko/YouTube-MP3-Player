@@ -7,6 +7,7 @@ from src.ui.subclasses import Player
 
 from src.main.load_url import LoadURL
 from src.main.storage import AppStorage
+from src.main.cur_playlist_data import Playlist
 from src.main.download_music import download_music
 
 from settings import *
@@ -24,6 +25,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
 
         self.LoadButton.clicked.connect(lambda: self.url_loading(self.linkInput.text()))
         self.playButton.clicked.connect(self.playMusic)
+        self.saveButton.clicked.connect(self.savePlaylist)
         self._cur_titles_shown = []
 
     @staticmethod
@@ -66,11 +68,15 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self.download_worker.start()
 
     def _open_playUI(self):
-        try:
-            self.play_music_UI = Player.Player(self.storage)
-            self.play_music_UI.show()
-        except Exception as e:
-            print(e)
+        if len(self.storage.vid_info) == 0:
+            QtWidgets.QMessageBox.warning(self.LoadButton, 'Warning',
+                                          'Please put in a proper YouTube video/playlist url')
+        else:
+            try:
+                self.play_music_UI = Player.Player(self.storage)
+                self.play_music_UI.show()
+            except Exception as e:
+                print(e)
 
     def _play_selected(self, dialog: QtWidgets.QDialog, chosen_songs):
         to_add = [i.data(QtCore.Qt.UserRole) for i in chosen_songs]

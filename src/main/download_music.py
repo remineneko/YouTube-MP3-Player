@@ -8,6 +8,7 @@ from src.main.media_metadata import MediaMetadata
 def download_music(info_list : List[MediaMetadata] = None):
     params = {
         'format': 'bestaudio/best',
+        'extractaudio': True,
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',

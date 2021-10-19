@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_PlayerWindow(object):
     def setupUi(self, PlayerWindow):
         PlayerWindow.setObjectName("PlayerWindow")
-        PlayerWindow.setFixedSize(681, 445)
+        PlayerWindow.setFixedSize(681, 483)
         self.centralwidget = QtWidgets.QWidget(PlayerWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.playButton = QtWidgets.QPushButton(self.centralwidget)
@@ -40,16 +40,18 @@ class Ui_PlayerWindow(object):
         self.volumeSlider.setOrientation(QtCore.Qt.Horizontal)
         self.volumeSlider.setObjectName("volumeSlider")
         self.queueList = QtWidgets.QListWidget(self.centralwidget)
-        self.queueList.setGeometry(QtCore.QRect(20, 200, 641, 201))
+        self.queueList.setGeometry(QtCore.QRect(20, 240, 641, 201))
         self.queueList.setObjectName("queueList")
-        self.timePlaying = QtWidgets.QProgressBar(self.centralwidget)
-        self.timePlaying.setGeometry(QtCore.QRect(20, 160, 641, 23))
-        self.timePlaying.setProperty("value", 24)
-        self.timePlaying.setTextVisible(False)
-        self.timePlaying.setObjectName("timePlaying")
         self.nowPlaying = QtWidgets.QLabel(self.centralwidget)
         self.nowPlaying.setGeometry(QtCore.QRect(20, 110, 641, 41))
         self.nowPlaying.setObjectName("nowPlaying")
+        self.timeSlider = QtWidgets.QSlider(self.centralwidget)
+        self.timeSlider.setGeometry(QtCore.QRect(20, 160, 641, 21))
+        self.timeSlider.setOrientation(QtCore.Qt.Horizontal)
+        self.timeSlider.setObjectName("timeSlider")
+        self.currentTime = QtWidgets.QLabel(self.centralwidget)
+        self.currentTime.setGeometry(QtCore.QRect(20, 190, 191, 21))
+        self.currentTime.setObjectName("currentTime")
         PlayerWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(PlayerWindow)
         self.statusbar.setObjectName("statusbar")
@@ -68,6 +70,7 @@ class Ui_PlayerWindow(object):
         self.shuffleButton.setText(_translate("PlayerWindow", "Shuffle"))
         self.stopButton.setText(_translate("PlayerWindow", "Stop"))
         self.nowPlaying.setText(_translate("PlayerWindow", "Now Playing:"))
+        self.currentTime.setText(_translate("PlayerWindow", "TextLabel"))
 
 
 if __name__ == "__main__":
