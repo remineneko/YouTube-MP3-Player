@@ -5,15 +5,17 @@ from typing import Dict
 
 
 class LoadURL:
-    def __init__(self, url, storage:AppStorage):
+    def __init__(self, url, storage:AppStorage = None):
         self._url = url
         if "list" in self._url:
             self._url_type = "playlist"
         else:
             self._url_type = "video"
-        storage.url = url
         self.inst = YoutubeDL()
-        storage.vid_info = self._load_info()
+        self.obtained_data = self._load_info()
+        if storage is not None:
+            storage.url = url
+            storage.vid_info = self.obtained_data
 
     def _load_info(self):
         obtained_data : Dict = self.inst.extract_info(self._url, download = False)
@@ -28,4 +30,5 @@ if __name__ == "__main__":
     playlist_url = "https://www.youtube.com/watch?v=O6vqvlHwkxk&list=PLj3JxVDwUCBlJEZ33x5vSjCCEnJImg1js"
     ns = AppStorage()
     LoadURL(norm_url, ns)
+    print(ns.vid_info[0].to_dict())
     LoadURL(playlist_url, ns)

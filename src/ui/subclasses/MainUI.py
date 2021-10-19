@@ -18,6 +18,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         super(MainMenu,self).__init__(parent)
         self.storage = storage
         self.setupUi(self)
+        self.setFixedSize(self.size())
 
         self.listWidget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 

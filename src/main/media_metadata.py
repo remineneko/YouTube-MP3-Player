@@ -82,5 +82,15 @@ class MediaMetadata:
     def __str__(self):
         print(self._full_info)
 
+    def __repr__(self):
+        return str(self.to_simple_dict())
 
+    def to_dict(self):
+        return self._full_info
 
+    def to_simple_dict(self):
+        return {
+            'title': self.title,
+            'duration': self.duration,
+            'url': self.original_url
+        }

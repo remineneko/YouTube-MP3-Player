@@ -18,9 +18,10 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
         self.storage = storage
 
         self.song_playing = False
-        self.pause_state = False
+        self.stop_state = False
 
         self.playlist = QMediaPlaylist()
+        self.setFixedSize(self.size())
 
         for now_playing_item_index in range(len(self.storage.now_playing)):
             cur_item = self.storage.now_playing[now_playing_item_index]
@@ -40,10 +41,9 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
         self.playButton.clicked.connect(self.play)
 
     def play(self):
-        selected_song_for_play = self.queueList.selectedItems()
-
         if not self.song_playing:
             self.player.play()
+            self.song_playing = True
         else:
             self._pause()
 
