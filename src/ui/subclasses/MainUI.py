@@ -26,6 +26,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self.LoadButton.clicked.connect(lambda: self.url_loading(self.linkInput.text()))
         self.playButton.clicked.connect(self.playMusic)
         self.saveButton.clicked.connect(self.savePlaylist)
+        self.pushButton.clicked.connect(self.loadPlaylist)
         self._cur_titles_shown = []
 
     @staticmethod
@@ -69,8 +70,8 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
 
     def _open_playUI(self):
         if len(self.storage.vid_info) == 0:
-            QtWidgets.QMessageBox.warning(self.LoadButton, 'Warning',
-                                          'Please put in a proper YouTube video/playlist url')
+            QtWidgets.QMessageBox.warning(self.playButton, 'Warning',
+                                          'Please load the metadata before proceeding to play')
         else:
             try:
                 self.play_music_UI = Player.Player(self.storage)
@@ -86,6 +87,26 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
     def _play_all(self, dialog: QtWidgets.QDialog):
         self.storage.now_playing = copy.deepcopy(self.storage.vid_info)
         dialog.close()
+
+    def savePlaylist(self):
+        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Save playlist information", "", "JSON (*.json)"
+        )
+        if len(file_path) != 0:
+            Playlist(self.storage.vid_info).save(file_path)
+
+    def loadPlaylist(self):
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName()
+        try:
+            self.load_saved_worker = LoadSavedPlaylistWorker(self.storage, file_path)
+            self.load_saved_worker.finished.connect(self._update_view)
+            self.load_saved_worker.start()
+        except ValueError:
+            QtWidgets.QMessageBox.warning(self.pushButton, 'Warning',
+                                          'Please load the correct .json file')
+
+
+
 
 
 class LoadWorker(QtCore.QThread):
@@ -109,6 +130,16 @@ class DownloadWorker(QtCore.QThread):
         except Exception as e:
             print(e)
 
+
+class LoadSavedPlaylistWorker(QtCore.QThread):
+    def __init__(self, storage: AppStorage, filePath:str):
+        super(LoadSavedPlaylistWorker, self).__init__()
+
+        self.storage = storage
+        self.fp = filePath
+
+    def run(self):
+        self.storage.vid_info = copy.deepcopy(Playlist().load(self.fp))
 
 if __name__ == "__main__":
     new_storage = AppStorage()
