@@ -21,6 +21,8 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self.setupUi(self)
         self.setFixedSize(self.size())
 
+        self.player_active = False
+
         self.listWidget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
         self.LoadButton.clicked.connect(lambda: self.url_loading(self.linkInput.text()))
@@ -77,11 +79,13 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
             QtWidgets.QMessageBox.warning(self.playButton, 'Warning',
                                           'Please load the metadata before proceeding to play')
         else:
-            try:
-                self.play_music_UI = Player.Player(self.storage)
+            self.play_music_UI = Player.Player(self.storage)
+            if self.player_active:
+                QtWidgets.QMessageBox.warning(self.playButton, 'Warning',
+                                                  'Another instance of the player is running. Please close it.')
+            else:
+                self.player_active = True
                 self.play_music_UI.show()
-            except Exception as e:
-                print(e)
 
     def _play_selected(self, dialog: QtWidgets.QDialog, chosen_songs):
         to_add = [i.data(QtCore.Qt.UserRole) for i in chosen_songs]
