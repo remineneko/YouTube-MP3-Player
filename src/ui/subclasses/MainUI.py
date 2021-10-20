@@ -2,7 +2,7 @@ import re
 import copy
 from PyQt5 import QtWidgets, QtGui, QtCore
 
-from src.ui.generated import MainScreen, PlayOptions, AddSongs
+from src.ui.generated import MainScreen, PlayOptions, AddSongs, SettingsUI
 from src.ui.subclasses import Player
 
 from src.main.load_url import LoadURL
@@ -11,7 +11,7 @@ from src.main.cur_playlist_data import Playlist
 from src.main.download_music import download_music
 
 from settings import *
-
+import os, shutil
 
 class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
 
@@ -32,6 +32,8 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
 
         self.addButton.clicked.connect(self.addSong)
         self.removeButton.clicked.connect(self.removeSong)
+
+        self.settingsButton.clicked.connect(self.setting)
 
         self._cur_titles_shown = []
 
@@ -102,13 +104,21 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
                                           'Please load at least a song before saving')
         else:
             file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
-                self, "Save playlist information", "", "JSON (*.json)"
+                self,
+                "Save playlist information",
+                self.storage.get_user_playlist_path_choice(),
+                "JSON (*.json)",
             )
             if len(file_path) != 0:
                 Playlist(self.storage.vid_info).save(file_path)
 
     def loadPlaylist(self):
-        file_path, _ = QtWidgets.QFileDialog.getOpenFileName()
+        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            "Load playlist information",
+            self.storage.get_user_playlist_path_choice(),
+            "JSON (*.json)"
+        )
         if len(file_path) != 0:
             try:
                 self.load_saved_worker = LoadSavedPlaylistWorker(self.storage, file_path)
@@ -146,6 +156,48 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
                 self.storage.remove_entry(item.data(QtCore.Qt.UserRole))
             self._update_view()
 
+    def setting(self):
+        self.settings_ui = QtWidgets.QDialog()
+        self.settings_dialog = SettingsUI.Ui_Dialog()
+        self.settings_dialog.setupUi(self.settings_ui)
+
+        self.settings_dialog.playlistPathEdit.setText(self.storage.get_user_playlist_path_choice())
+        self.settings_dialog.musicPathEdit.setText(self.storage.get_user_music_path_choice())
+        self.settings_dialog.isFlushing.setChecked(self.storage.get_user_flush_choice())
+
+        self.settings_dialog.plBrowse.clicked.connect(self._plBrowse)
+        self.settings_dialog.musicBrowse.clicked.connect(self._mBrowse)
+        self.settings_dialog.confirmOptions.accepted.connect(self._modify_config)
+
+        self.settings_ui.exec_()
+
+    def _plBrowse(self):
+        folder_path = QtWidgets.QFileDialog.getExistingDirectory()
+        if len(folder_path) != 0:
+            self.settings_dialog.playlistPathEdit.setText(folder_path)
+
+    def _mBrowse(self):
+        folder_path = QtWidgets.QFileDialog.getExistingDirectory()
+        if len(folder_path) != 0:
+            self.settings_dialog.musicPathEdit.setText(folder_path)
+
+    def _modify_config(self):
+        self.storage.modify_pl_config(self.settings_dialog.playlistPathEdit.text())
+        self.storage.modify_music_config(self.settings_dialog.musicPathEdit.text())
+        self.storage.modify_flush_config(self.settings_dialog.isFlushing.isChecked())
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        if self.storage.get_user_flush_choice():
+            folder = self.storage.get_user_music_path_choice()
+            for filename in os.listdir(folder):
+                file_path = os.path.join(folder, filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception:
+                    print('Failed to delete %s.' % (file_path))
 
 class AddWorker(QtCore.QThread):
     def __init__(self, url, storage:AppStorage):
@@ -175,7 +227,7 @@ class DownloadWorker(QtCore.QThread):
 
     def run(self):
         try:
-            download_music(info_list=self.storage.now_playing)
+            download_music(self.storage)
         except Exception as e:
             print(e)
 
@@ -190,9 +242,11 @@ class LoadSavedPlaylistWorker(QtCore.QThread):
     def run(self):
         self.storage.vid_info = copy.deepcopy(Playlist().load(self.fp))
 
+
 if __name__ == "__main__":
     new_storage = AppStorage()
     from settings import *
+    from src.main.config import setup_config
     data_dir = os.path.join(ROOT_FOLDER, 'data')
     try:
         os.mkdir(data_dir, mode= 0o777)
@@ -206,6 +260,8 @@ if __name__ == "__main__":
         pass
 
     import sys
+
+    setup_config()
 
     app = QtWidgets.QApplication(sys.argv)
     ui = MainMenu(new_storage)

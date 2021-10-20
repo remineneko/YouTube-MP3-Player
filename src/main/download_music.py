@@ -3,9 +3,10 @@ from typing import List
 from settings import *
 from src.main.alter_title import alter_title
 from src.main.media_metadata import MediaMetadata
+from src.main.storage import AppStorage
 
-
-def download_music(info_list : List[MediaMetadata] = None):
+def download_music(storage:AppStorage):
+    info_list = storage.now_playing
     params = {
         'format': 'bestaudio/best',
         'extractaudio': True,
@@ -14,7 +15,7 @@ def download_music(info_list : List[MediaMetadata] = None):
             'preferredcodec': 'mp3',
             'preferredquality': '192',
         }],
-        'outtmpl': os.path.join(MUSIC_FOLDER, '%(title)s.%(ext)s')
+        'outtmpl': os.path.join(storage.get_user_music_path_choice(), '%(title)s.%(ext)s')
     }
 
     with YoutubeDL(params) as ydl:

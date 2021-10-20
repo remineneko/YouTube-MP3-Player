@@ -1,13 +1,14 @@
 from typing import List, Dict
 import copy
 from src.main.media_metadata import MediaMetadata
+from src.main.config import *
 
 
 class AppStorage:
-    def __init__(self):
+    def __init__(self, config_path = os.path.join(DATA_FOLDER,'config.ini')):
         self._given_url = None
         self._all_videos_info : List[MediaMetadata] = []
-        self.config = self.load_config()
+        self._config_path = config_path
         self.now_playing : List[MediaMetadata] = []
 
     @property
@@ -26,13 +27,6 @@ class AppStorage:
     def vid_info(self, info_obtained: List[Dict]):
         self._all_videos_info = copy.deepcopy(info_obtained)
 
-    def load_config(self):
-        '''
-        Loads the config for the program.
-        :return:
-        '''
-        return None
-
     def remove_entry(self, entry):
         self._all_videos_info.remove(entry)
 
@@ -42,3 +36,21 @@ class AppStorage:
         else:
             if entry not in self.vid_info:
                 self._all_videos_info.append(entry)
+
+    def modify_pl_config(self, new_value):
+        modify_pl_loc(self._config_path, new_value)
+
+    def modify_music_config(self, new_value):
+        modify_music_loc(self._config_path, new_value)
+
+    def modify_flush_config(self, new_value):
+        modify_flush_state(self._config_path, new_value)
+
+    def get_user_music_path_choice(self):
+        return get_user_music_location(self._config_path)
+
+    def get_user_playlist_path_choice(self):
+        return get_user_playlist_default_folder(self._config_path)
+
+    def get_user_flush_choice(self):
+        return get_user_flush_choice(self._config_path)
