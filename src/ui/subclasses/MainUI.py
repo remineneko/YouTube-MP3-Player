@@ -2,7 +2,7 @@ import re
 import copy
 from PyQt5 import QtWidgets, QtGui, QtCore
 
-from src.ui.generated import MainScreen, PlayOptions
+from src.ui.generated import MainScreen, PlayOptions, AddSongs
 from src.ui.subclasses import Player
 
 from src.main.load_url import LoadURL
@@ -27,6 +27,10 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self.playButton.clicked.connect(self.playMusic)
         self.saveButton.clicked.connect(self.savePlaylist)
         self.pushButton.clicked.connect(self.loadPlaylist)
+
+        self.addButton.clicked.connect(self.addSong)
+        self.removeButton.clicked.connect(self.removeSong)
+
         self._cur_titles_shown = []
 
     @staticmethod
@@ -110,8 +114,44 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
                 QtWidgets.QMessageBox.warning(self.pushButton, 'Warning',
                                               'Please load the correct .json file')
 
+    def addSong(self):
+        self.add_song_ui = QtWidgets.QDialog()
+        self.add_song_popup = AddSongs.Ui_Dialog()
+        self.add_song_popup.setupUi(self.add_song_ui)
+        self.add_song_popup.pushButton.clicked.connect(lambda: self._add_songs(self.add_song_popup.lineEdit.text()))
+        self.add_song_ui.exec_()
+
+    def _add_songs(self, content):
+        content_list = content.split(";")
+        for c in content_list:
+            stripped_content = c.replace(" ", "")
+            if len(stripped_content) != 0:
+                self._worker = AddWorker(stripped_content, self.storage)
+                self._worker.finished.connect(self._update_view)
+                self._worker.start()
+        self.add_song_ui.close()
+
+    def removeSong(self):
+        selectedItems = self.listWidget.selectedItems()
+        if len(selectedItems) == 0:
+            QtWidgets.QMessageBox.warning(self.removeButton, 'Warning',
+                                          'Please choose at least a song to be removed')
+        else:
+            for item in selectedItems:
+                self.listWidget.takeItem(self.listWidget.row(item))
+                self.storage.remove_entry(item.data(QtCore.Qt.UserRole))
+            self._update_view()
 
 
+class AddWorker(QtCore.QThread):
+    def __init__(self, url, storage:AppStorage):
+        super(AddWorker, self).__init__()
+        self._url = url
+        self._storage = storage
+
+    def run(self):
+        data = LoadURL(self._url).obtained_data
+        self._storage.add_entry(data)
 
 
 class LoadWorker(QtCore.QThread):

@@ -32,3 +32,13 @@ class AppStorage:
         :return:
         '''
         return None
+
+    def remove_entry(self, entry):
+        self._all_videos_info.remove(entry)
+
+    def add_entry(self, entry):
+        if type(entry) == list:
+            self._all_videos_info.extend(entry)
+        else:
+            if entry not in self.vid_info:
+                self._all_videos_info.append(entry)

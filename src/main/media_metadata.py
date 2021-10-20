@@ -85,6 +85,15 @@ class MediaMetadata:
     def __repr__(self):
         return str(self.to_simple_dict())
 
+    def __eq__(self, o):
+        if isinstance(o, MediaMetadata):
+            if self.id == o.id:
+                return True
+            else:
+                return False
+        else:
+            return False
+
     def to_dict(self):
         return self._full_info
 
