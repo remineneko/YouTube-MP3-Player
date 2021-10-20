@@ -17,8 +17,9 @@ def setup_config():
         'AllowFlush': False
     }
 
-    with open(os.path.join(DATA_FOLDER,'config.ini'), 'w') as configfile:
-        config.write(configfile)
+    if not os.path.isfile(os.path.join(DATA_FOLDER,'config.ini')):
+        with open(os.path.join(DATA_FOLDER,'config.ini'), 'w') as configfile:
+            config.write(configfile)
 
 
 def _read_config(path):
