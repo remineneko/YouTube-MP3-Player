@@ -19,7 +19,7 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
 
         self.storage = storage
 
-        self.play_button_click_time = 0
+        self.first_song_played = False
 
         self.song_playing = False
         self.stop_state = False
@@ -62,18 +62,21 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
         self.player.currentMediaChanged.connect(self._change_media)
         self.player.positionChanged.connect(self._change_pos)
 
-        self.timeSlider.sliderPressed.connect(self._change_music_pos)
+        # self.timeSlider.sliderPressed.connect(self._change_music_pos)
+        self.timeSlider.sliderReleased.connect(self._change_music_pos)
 
     def set_playlist_pos(self, pos = 0):
         self.current_play_pos = pos
         self.playlist.setCurrentIndex(self.current_play_pos)
 
     def play(self):
-        if self.play_button_click_time == 0:
+        if not self.first_song_played:
             self._change_media()
-            self.play_button_click_time += 1
+            self.first_song_played = True
+
         if not self.song_playing:
             self.player.play()
+            self.nowPlaying.setText("Now Playing: {}".format(self.storage.now_playing[self.current_play_pos].title))
             self.song_playing = True
         else:
             self._pause()
@@ -92,7 +95,8 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
             self.play()
         else:
             self.set_playlist_pos(self.current_play_pos - 1)
-            self.player.play()
+            self.song_playing = False
+            self.play()
 
     def foward(self):
         if self.current_play_pos >= self.playlist.mediaCount() - 1:
@@ -141,31 +145,31 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
 
     def dc_evt(self, index):
         self.set_playlist_pos(index.row())
+        self._change_media()
         self.player.play()
 
     def _change_media(self):
         try:
-            currently_playing_dur = self.player.duration() / 1000
+            currently_playing_dur = self.storage.now_playing[self.current_play_pos].duration
             converted_time = str(datetime.timedelta(seconds=currently_playing_dur)).split(".")[0]
             self.nowPlaying.setText("Now Playing: {}".format(self.storage.now_playing[self.current_play_pos].title))
             self.currentTime.setText("0:00:00/{}".format(converted_time))
             segment_length = int(currently_playing_dur)
-            self.timeSlider.setSliderPosition(0)
             self.timeSlider.setMaximum(segment_length)
         except Exception as e:
             print(e)
 
     def _change_pos(self):
-        currently_playing_dur = self.player.duration() / 1000
+        currently_playing_dur = self.storage.now_playing[self.current_play_pos].duration
         converted_time = str(datetime.timedelta(seconds=currently_playing_dur)).split(".")[0]
         cur_pos = int(self.player.position() / 1000)
-        self.timeSlider.setSliderPosition(cur_pos)
+        self.timeSlider.setValue(cur_pos)
         converted_pos = str(datetime.timedelta(seconds=(self.player.position()/1000))).split(".")[0]
         self.currentTime.setText('{}/{}'.format(converted_pos,converted_time))
 
     def _change_music_pos(self):
-        cur_pos = self.timeSlider.sliderPosition()
-        currently_playing_dur = self.player.duration() / 1000
+        cur_pos = self.timeSlider.value()
+        currently_playing_dur = self.storage.now_playing[self.current_play_pos].duration
         converted_time = str(datetime.timedelta(seconds=currently_playing_dur)).split(".")[0]
         music_cur_pos = cur_pos * 1000
         self.player.setPosition(music_cur_pos)

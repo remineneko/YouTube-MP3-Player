@@ -89,21 +89,26 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         dialog.close()
 
     def savePlaylist(self):
-        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Save playlist information", "", "JSON (*.json)"
-        )
-        if len(file_path) != 0:
-            Playlist(self.storage.vid_info).save(file_path)
+        if len(self.storage.vid_info) == 0:
+            QtWidgets.QMessageBox.warning(self.saveButton, 'Warning',
+                                          'Please load at least a song before saving')
+        else:
+            file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+                self, "Save playlist information", "", "JSON (*.json)"
+            )
+            if len(file_path) != 0:
+                Playlist(self.storage.vid_info).save(file_path)
 
     def loadPlaylist(self):
         file_path, _ = QtWidgets.QFileDialog.getOpenFileName()
-        try:
-            self.load_saved_worker = LoadSavedPlaylistWorker(self.storage, file_path)
-            self.load_saved_worker.finished.connect(self._update_view)
-            self.load_saved_worker.start()
-        except ValueError:
-            QtWidgets.QMessageBox.warning(self.pushButton, 'Warning',
-                                          'Please load the correct .json file')
+        if len(file_path) != 0:
+            try:
+                self.load_saved_worker = LoadSavedPlaylistWorker(self.storage, file_path)
+                self.load_saved_worker.finished.connect(self._update_view)
+                self.load_saved_worker.start()
+            except ValueError:
+                QtWidgets.QMessageBox.warning(self.pushButton, 'Warning',
+                                              'Please load the correct .json file')
 
 
 
