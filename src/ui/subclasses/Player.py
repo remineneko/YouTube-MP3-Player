@@ -13,6 +13,9 @@ import datetime
 
 
 class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
+
+    _DEFAULT_VOLUME = 25
+
     def __init__(self, storage: AppStorage, parent = None):
         super(Player, self).__init__(parent)
         self.setupUi(self)
@@ -59,11 +62,19 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
         self.shuffleButton.clicked.connect(self.shuffle)
         self.queueList.itemDoubleClicked.connect(lambda: self.dc_evt(self.queueList.currentIndex()))
 
+        self.volumeSlider.setMaximum(100)
+
+        # set default volume
+        self.volumeSlider.setValue(self._DEFAULT_VOLUME)
+        self.player.setVolume(self.volumeSlider.value())
+
         self.player.currentMediaChanged.connect(self._change_media)
         self.player.positionChanged.connect(self._change_pos)
 
         # self.timeSlider.sliderPressed.connect(self._change_music_pos)
         self.timeSlider.sliderReleased.connect(self._change_music_pos)
+
+        self.volumeSlider.sliderReleased.connect(self._change_volume)
 
     def set_playlist_pos(self, pos = 0):
         self.current_play_pos = pos
@@ -126,10 +137,13 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
 
     def shuffle(self):
         if not self.shuffle_state:
-            self.playlist.setPlaybackMode(QMediaPlaylist.Random)
+            self.shuffleButton.setText("Shuffle ON")
             self.shuffle_state = True
+            if self.current_play_state != QMediaPlaylist.CurrentItemOnce:
+                self.playlist.setPlaybackMode(QMediaPlaylist.Random)
         else:
             self.shuffle_state = False
+            self.shuffleButton.setText("Shuffle")
             self.playlist.setPlaybackMode(self.current_play_state)
 
     def change_status(self, status):
@@ -175,6 +189,9 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
         self.player.setPosition(music_cur_pos)
         converted_pos = str(datetime.timedelta(seconds=(self.player.position() / 1000))).split(".")[0]
         self.currentTime.setText('{}/{}'.format(converted_pos, converted_time))
+
+    def _change_volume(self):
+        self.player.setVolume(self.volumeSlider.value())
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.player.stop()
