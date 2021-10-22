@@ -103,6 +103,7 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
     def back(self):
         if self.current_play_pos == 0:
             self.player.stop()
+            self.song_playing = False
             self.play()
         else:
             self.set_playlist_pos(self.current_play_pos - 1)
