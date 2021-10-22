@@ -19,19 +19,14 @@ class Searcher(QtWidgets.QMainWindow, Ui_SearchWindow):
         self.storage = storage
         self._search_website = search_website
         self._search_inst = SearchVideos(self.storage, self._search_website)
-        self.searchButton.clicked.connect(lambda: self.search(self.queryEdit.text()))
         self.searchResultBox.itemDoubleClicked.connect(lambda: self._show_metadata(data = self.searchResultBox.currentItem().data(QtCore.Qt.UserRole)))
         self.searchResultBox.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
-        self._output_UI = QtWidgets.QMainWindow()
-        self._output_window = Ui_MainWindow()
-        self._output_window.setupUi(self._output_UI)
-
-    def search(self, query):
-        self._output_window.outputPrinter.clear()
-        self._output_UI.show()
+    def search(self, query, output_window, output_UI):
+        output_window.outputPrinter.clear()
+        output_UI.show()
         self.search_worker = SearchWorker(self.storage, self._search_inst, query)
-        self.search_worker.finished.connect(self.finished_searching)
+        self.search_worker.finished.connect(lambda: self.finished_searching(output_UI))
         self.search_worker.start()
 
     def _running_warning(self, worker):
@@ -43,7 +38,8 @@ class Searcher(QtWidgets.QMainWindow, Ui_SearchWindow):
                 QtWidgets.QMessageBox.warning(self.addButton, 'Warning',
                                               'Please wait for the search to complete')
 
-    def finished_searching(self):
+    def finished_searching(self, outputUI):
+        outputUI.close()
         self.searchResultBox.clear()
         for r_index in range(len(self.storage.temp_search_storage)):
             item = self.storage.temp_search_storage[r_index]

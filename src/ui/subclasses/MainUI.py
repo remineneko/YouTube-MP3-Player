@@ -223,6 +223,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self.search_option_ui.close()
         self.add_song_ui.close()
         self.search_main_ui = SearchSongs.Searcher(self.storage, option)
+        self.search_main_ui.searchButton.clicked.connect(lambda: self.search_main_ui.search(self.search_main_ui.queryEdit.text(), self._output_window, self._output_UI))
         self.search_main_ui.addButton.clicked.connect(self._add_results)
         self.search_main_ui.show()
 
