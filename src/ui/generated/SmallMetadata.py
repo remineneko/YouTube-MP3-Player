@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Metadata(object):
     def setupUi(self, Metadata):
         Metadata.setObjectName("Metadata")
-        Metadata.resize(869, 219)
+        Metadata.resize(869, 245)
         self.label = QtWidgets.QLabel(Metadata)
         self.label.setGeometry(QtCore.QRect(20, 30, 171, 31))
         self.label.setObjectName("label")
@@ -30,10 +30,17 @@ class Ui_Metadata(object):
         self.timeLabel.setText("")
         self.timeLabel.setObjectName("timeLabel")
         self.label_4 = QtWidgets.QLabel(Metadata)
-        self.label_4.setGeometry(QtCore.QRect(20, 130, 171, 31))
+        self.label_4.setGeometry(QtCore.QRect(20, 180, 171, 31))
         self.label_4.setObjectName("label_4")
+        self.uploaderLabel = QtWidgets.QLabel(Metadata)
+        self.uploaderLabel.setGeometry(QtCore.QRect(200, 130, 651, 31))
+        self.uploaderLabel.setText("")
+        self.uploaderLabel.setObjectName("uploaderLabel")
+        self.label_5 = QtWidgets.QLabel(Metadata)
+        self.label_5.setGeometry(QtCore.QRect(20, 130, 171, 31))
+        self.label_5.setObjectName("label_5")
         self.urlLabel = QtWidgets.QLabel(Metadata)
-        self.urlLabel.setGeometry(QtCore.QRect(200, 130, 651, 31))
+        self.urlLabel.setGeometry(QtCore.QRect(200, 180, 651, 31))
         self.urlLabel.setText("")
         self.urlLabel.setObjectName("urlLabel")
 
@@ -46,6 +53,7 @@ class Ui_Metadata(object):
         self.label.setText(_translate("Metadata", "Title"))
         self.label_2.setText(_translate("Metadata", "Duration"))
         self.label_4.setText(_translate("Metadata", "URL"))
+        self.label_5.setText(_translate("Metadata", "Uploader"))
 
 
 if __name__ == "__main__":

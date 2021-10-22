@@ -51,16 +51,18 @@ class Searcher(QtWidgets.QMainWindow, Ui_SearchWindow):
         converted_time = str(datetime.timedelta(seconds=data.duration)).split(".")[0]
         self.meta_wid_ui.timeLabel.setText(converted_time)
         self.meta_wid_ui.urlLabel.setText(data.original_url)
+        self.meta_wid_ui.uploaderLabel.setText(data.uploader)
         self.meta_widget.show()
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         if self.search_worker.running:
+            a0.ignore()
             self.error_dialog = QtWidgets.QErrorMessage()
             self.error_dialog.setWindowTitle('Warning')
             self.error_dialog.showMessage('Please wait for the search to complete')
             self.error_dialog.exec_()
         else:
-            self.close()
+            a0.accept()
 
 
 class SearchWorker(QtCore.QThread):
