@@ -1,8 +1,11 @@
+import datetime
 import re
 import copy
 from PyQt5 import QtWidgets, QtGui, QtCore
 
+from src.main.media_metadata import MediaMetadata
 from src.ui.generated import MainScreen, PlayOptions, AddSongs, SettingsUI, SearchOptionsUI, InfoWindow
+from src.ui.generated.SmallMetadata import Ui_Metadata
 from src.ui.subclasses import Player, SearchSongs
 
 from src.main.load_url import LoadURL
@@ -24,7 +27,9 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self.player_active = False
 
         self.listWidget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-
+        self.listWidget.itemDoubleClicked.connect(
+            lambda: self._show_metadata(data=self.searchResultBox.currentItem().data(QtCore.Qt.UserRole))
+        )
         self.LoadButton.clicked.connect(lambda: self.url_loading(self.linkInput.text()))
         self.playButton.clicked.connect(self.playMusic)
         self.saveButton.clicked.connect(self.savePlaylist)
@@ -133,7 +138,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
             if len(file_path) != 0:
                 Playlist(self.storage.vid_info).save(file_path)
 
-    def loadPlaylist(self):
+    def loadPlaylist(self, role = 'OverwriteLoad'):
         file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
             self,
             "Load playlist information",
@@ -144,7 +149,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
             try:
                 self._output_window.outputPrinter.clear()
                 self._output_UI.show()
-                self.load_saved_worker = LoadSavedPlaylistWorker(self.storage, file_path)
+                self.load_saved_worker = LoadSavedPlaylistWorker(self.storage, file_path, role)
                 self.load_saved_worker.finished.connect(self._update_view)
                 self.load_saved_worker.start()
             except ValueError:
@@ -157,7 +162,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self.add_song_popup.setupUi(self.add_song_ui)
         self.add_song_popup.addSongButton.clicked.connect(lambda: self._add_songs(self.add_song_popup.linksEdit.text()))
         self.add_song_popup.searchButton.clicked.connect(self._search_songs)
-        self.add_song_popup.pushButton.clicked.connect(self.loadPlaylist)
+        self.add_song_popup.pushButton.clicked.connect(lambda: self.loadPlaylist(''))
         self.add_song_ui.exec_()
 
     def _add_songs(self, content):
@@ -233,6 +238,17 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self.search_main_ui.close()
         self._update_view()
 
+    def _show_metadata(self, data:MediaMetadata):
+        self.meta_widget = QtWidgets.QWidget()
+        self.meta_wid_ui = Ui_Metadata()
+        self.meta_wid_ui.setupUi(self.meta_widget)
+        self.meta_wid_ui.titleLabel.setText(data.title)
+        converted_time = str(datetime.timedelta(seconds=data.duration)).split(".")[0]
+        self.meta_wid_ui.timeLabel.setText(converted_time)
+        self.meta_wid_ui.urlLabel.setText(data.original_url)
+        self.meta_wid_ui.uploaderLabel.setText(data.uploader)
+        self.meta_widget.show()
+
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         if self.storage.get_user_flush_choice():
             folder = self.storage.get_user_music_path_choice()
@@ -248,6 +264,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
 
         a0.accept()
         sys.exit(0)
+
 
 class AddWorker(QtCore.QThread):
     def __init__(self, url, storage:AppStorage):
@@ -283,15 +300,18 @@ class DownloadWorker(QtCore.QThread):
 
 
 class LoadSavedPlaylistWorker(QtCore.QThread):
-    def __init__(self, storage: AppStorage, filePath:str):
+    def __init__(self, storage: AppStorage, filePath:str, role: str = 'OverwriteLoad'):
         super(LoadSavedPlaylistWorker, self).__init__()
 
         self.storage = storage
         self.fp = filePath
+        self.role = role
 
     def run(self):
-        self.storage.vid_info = copy.deepcopy(Playlist().load(self.fp))
-
+        if self.role == 'OverwriteLoad':
+            self.storage.vid_info = copy.deepcopy(Playlist().load(self.fp))
+        else:
+            self.storage.add_entry(copy.deepcopy(Playlist().load(self.fp)))
 
 if __name__ == "__main__":
     new_storage = AppStorage()
