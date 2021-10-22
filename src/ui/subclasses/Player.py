@@ -74,7 +74,7 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
         # self.timeSlider.sliderPressed.connect(self._change_music_pos)
         self.timeSlider.sliderReleased.connect(self._change_music_pos)
 
-        self.volumeSlider.sliderReleased.connect(self._change_volume)
+        self.volumeSlider.sliderMoved.connect(self._change_volume)
 
     def set_playlist_pos(self, pos = 0):
         self.current_play_pos = pos
@@ -155,7 +155,10 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
             elif self.current_play_pos == self.playlist.mediaCount() - 1 and self.current_play_state == QMediaPlaylist.Loop:
                 self.set_playlist_pos()
                 self.player.play()
+            elif self.current_play_state == QMediaPlaylist.CurrentItemOnce:
+                self.player.play()
             else:
+                self.song_playing = False
                 self.player.stop()
 
     def dc_evt(self, index):
