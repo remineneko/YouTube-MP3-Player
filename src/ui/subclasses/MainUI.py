@@ -2,8 +2,8 @@ import re
 import copy
 from PyQt5 import QtWidgets, QtGui, QtCore
 
-from src.ui.generated import MainScreen, PlayOptions, AddSongs, SettingsUI
-from src.ui.subclasses import Player
+from src.ui.generated import MainScreen, PlayOptions, AddSongs, SettingsUI, SearchOptionsUI
+from src.ui.subclasses import Player, SearchSongs
 
 from src.main.load_url import LoadURL
 from src.main.storage import AppStorage
@@ -132,7 +132,9 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self.add_song_ui = QtWidgets.QDialog()
         self.add_song_popup = AddSongs.Ui_Dialog()
         self.add_song_popup.setupUi(self.add_song_ui)
-        self.add_song_popup.pushButton.clicked.connect(lambda: self._add_songs(self.add_song_popup.lineEdit.text()))
+        self.add_song_popup.addSongButton.clicked.connect(lambda: self._add_songs(self.add_song_popup.lineEdit.text()))
+        self.add_song_popup.searchButton.clicked.connect(self._search_songs)
+        self.add_song_popup.pushButton.clicked.connect(self.loadPlaylist)
         self.add_song_ui.exec_()
 
     def _add_songs(self, content):
@@ -186,6 +188,27 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self.storage.modify_music_config(self.settings_dialog.musicPathEdit.text())
         self.storage.modify_flush_config(self.settings_dialog.isFlushing.isChecked())
 
+    def _search_songs(self):
+        self.search_option_ui = QtWidgets.QDialog()
+        self.search_option_popup = SearchOptionsUI.Ui_SearchOptionsUI()
+        self.search_option_popup.setupUi(self.search_option_ui)
+        self.search_option_popup.YTSearch.clicked.connect(lambda: self._search("YouTube"))
+        self.search_option_popup.pushButton_2.clicked.connect(lambda: self._search("Bilibili"))
+        self.search_option_ui.exec_()
+
+    def _search(self, option):
+        self.search_option_ui.close()
+        self.add_song_ui.close()
+        self.search_main_ui = SearchSongs.Searcher(self.storage, option)
+        self.search_main_ui.addButton.clicked.connect(self._add_results)
+        self.search_main_ui.show()
+
+    def _add_results(self):
+        all_results = self.search_main_ui.searchResultBox.selectedItems()
+        self.storage.add_entry([i.data(QtCore.Qt.UserRole) for i in all_results])
+        self.search_main_ui.close()
+        self._update_view()
+
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         if self.storage.get_user_flush_choice():
             folder = self.storage.get_user_music_path_choice()
@@ -198,6 +221,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
                         shutil.rmtree(file_path)
                 except Exception:
                     print('Failed to delete %s.' % (file_path))
+
 
 class AddWorker(QtCore.QThread):
     def __init__(self, url, storage:AppStorage):

@@ -10,6 +10,7 @@ class AppStorage:
         self._all_videos_info : List[MediaMetadata] = []
         self._config_path = config_path
         self.now_playing : List[MediaMetadata] = []
+        self.temp_search_storage = []
 
     @property
     def url(self) -> str:
@@ -54,3 +55,9 @@ class AppStorage:
 
     def get_user_flush_choice(self):
         return get_user_flush_choice(self._config_path)
+
+    def get_search_data(self, obj):
+        self.temp_search_storage = copy.deepcopy(obj)
+
+    def flush_temp_data(self):
+        self.temp_search_storage.clear()
