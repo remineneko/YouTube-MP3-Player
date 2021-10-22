@@ -1,6 +1,7 @@
 def alter_title(title):
-    illegal = ["\\", ":", "<", ">", "/", "|", "?", "*"]
+    illegal = ["\\", "<", ">", "/", "|", "?", "*"]
     for restriction in illegal:
         title = title.replace(restriction, "_")
     title = title.replace("\"","\'")
+    title = title.replace(":", " -")
     return title

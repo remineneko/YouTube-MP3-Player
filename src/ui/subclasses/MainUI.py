@@ -2,7 +2,7 @@ import re
 import copy
 from PyQt5 import QtWidgets, QtGui, QtCore
 
-from src.ui.generated import MainScreen, PlayOptions, AddSongs, SettingsUI, SearchOptionsUI
+from src.ui.generated import MainScreen, PlayOptions, AddSongs, SettingsUI, SearchOptionsUI, InfoWindow
 from src.ui.subclasses import Player, SearchSongs
 
 from src.main.load_url import LoadURL
@@ -10,8 +10,8 @@ from src.main.storage import AppStorage
 from src.main.cur_playlist_data import Playlist
 from src.main.download_music import download_music
 
-from settings import *
-import os, shutil
+import shutil, sys
+
 
 class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
 
@@ -37,19 +37,33 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
 
         self._cur_titles_shown = []
 
+        self._output_UI = QtWidgets.QMainWindow()
+        self._output_window = InfoWindow.Ui_MainWindow()
+        self._output_window.setupUi(self._output_UI)
+
     @staticmethod
     def is_valid_youtube_url(given_url):
         return bool(re.search(r'^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$', given_url))
+
+    def tbOutput(self, txt):
+        self._output_window.outputPrinter.append(txt)
+        QtGui.QGuiApplication.processEvents()
 
     def url_loading(self, input_url):
         if not self.is_valid_youtube_url(input_url): # bilibili support will come later, please wait for it Rem :p
             QtWidgets.QMessageBox.warning(self.LoadButton,'Warning','Please put in a proper YouTube video/playlist url')
         else:
+            self._output_window.outputPrinter.clear()
+            self._output_UI.show()
             self.load_worker = LoadWorker(input_url, self.storage)
             self.load_worker.finished.connect(self._update_view)
             self.load_worker.start()
 
     def _update_view(self):
+        try:
+            self._output_UI.close()
+        except:
+            pass
         self.listWidget.clear()
         for song_metadata_ind in range(len(self.storage.vid_info)):
             self.listWidget.addItem(self.storage.vid_info[song_metadata_ind].title)
@@ -71,22 +85,29 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
             self.popup_ui.exec_()
 
         # load the songs into a folder first
-
+        self._output_window.outputPrinter.clear()
+        self._output_UI.show()
         self.download_worker = DownloadWorker(self.storage)
         self.download_worker.finished.connect(self._open_playUI)
         self.download_worker.start()
 
     def _open_playUI(self):
+        try:
+            self._output_UI.close()
+        except:
+            pass
         if len(self.storage.vid_info) == 0:
             QtWidgets.QMessageBox.warning(self.playButton, 'Warning',
                                           'Please load the metadata before proceeding to play')
         else:
-            self.play_music_UI = Player.Player(self.storage)
-            if self.player_active:
-                QtWidgets.QMessageBox.warning(self.playButton, 'Warning',
-                                                  'Another instance of the player is running. Please close it.')
-            else:
-                self.player_active = True
+            try:
+                if self.play_music_UI.isVisible():
+                    QtWidgets.QMessageBox.warning(self.playButton, 'Warning',
+                                          'Another instance of the player is running. Please close it.')
+                else:
+                    self.play_music_UI.show()
+            except Exception as e:
+                self.play_music_UI = Player.Player(self.storage)
                 self.play_music_UI.show()
 
     def _play_selected(self, dialog: QtWidgets.QDialog, chosen_songs):
@@ -121,6 +142,8 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         )
         if len(file_path) != 0:
             try:
+                self._output_window.outputPrinter.clear()
+                self._output_UI.show()
                 self.load_saved_worker = LoadSavedPlaylistWorker(self.storage, file_path)
                 self.load_saved_worker.finished.connect(self._update_view)
                 self.load_saved_worker.start()
@@ -132,7 +155,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self.add_song_ui = QtWidgets.QDialog()
         self.add_song_popup = AddSongs.Ui_Dialog()
         self.add_song_popup.setupUi(self.add_song_ui)
-        self.add_song_popup.addSongButton.clicked.connect(lambda: self._add_songs(self.add_song_popup.lineEdit.text()))
+        self.add_song_popup.addSongButton.clicked.connect(lambda: self._add_songs(self.add_song_popup.linksEdit.text()))
         self.add_song_popup.searchButton.clicked.connect(self._search_songs)
         self.add_song_popup.pushButton.clicked.connect(self.loadPlaylist)
         self.add_song_ui.exec_()
@@ -222,6 +245,8 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
                 except Exception:
                     print('Failed to delete %s.' % (file_path))
 
+        a0.accept()
+        sys.exit(0)
 
 class AddWorker(QtCore.QThread):
     def __init__(self, url, storage:AppStorage):

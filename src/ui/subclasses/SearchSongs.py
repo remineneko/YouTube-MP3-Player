@@ -5,6 +5,7 @@ from src.main.media_metadata import MediaMetadata
 from src.main.search import SearchVideos
 from src.ui.generated.SearchUI import Ui_SearchWindow
 from src.ui.generated.SmallMetadata import Ui_Metadata
+from src.ui.generated.InfoWindow import Ui_MainWindow
 
 
 import datetime
@@ -22,7 +23,13 @@ class Searcher(QtWidgets.QMainWindow, Ui_SearchWindow):
         self.searchResultBox.itemDoubleClicked.connect(lambda: self._show_metadata(data = self.searchResultBox.currentItem().data(QtCore.Qt.UserRole)))
         self.searchResultBox.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
+        self._output_UI = QtWidgets.QMainWindow()
+        self._output_window = Ui_MainWindow()
+        self._output_window.setupUi(self._output_UI)
+
     def search(self, query):
+        self._output_window.outputPrinter.clear()
+        self._output_UI.show()
         self.search_worker = SearchWorker(self.storage, self._search_inst, query)
         self.search_worker.finished.connect(self.finished_searching)
         self.search_worker.start()
