@@ -28,12 +28,12 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
 
         self.listWidget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.listWidget.itemDoubleClicked.connect(
-            lambda: self._show_metadata(data=self.searchResultBox.currentItem().data(QtCore.Qt.UserRole))
+            lambda: self._show_metadata(data=self.listWidget.currentItem().data(QtCore.Qt.UserRole))
         )
         self.LoadButton.clicked.connect(lambda: self.url_loading(self.linkInput.text()))
         self.playButton.clicked.connect(self.playMusic)
         self.saveButton.clicked.connect(self.savePlaylist)
-        self.pushButton.clicked.connect(self.loadPlaylist)
+        self.pushButton.clicked.connect(lambda: self.loadPlaylist(True))
 
         self.addButton.clicked.connect(self.addSong)
         self.removeButton.clicked.connect(self.removeSong)
@@ -138,7 +138,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
             if len(file_path) != 0:
                 Playlist(self.storage.vid_info).save(file_path)
 
-    def loadPlaylist(self, role = 'OverwriteLoad'):
+    def loadPlaylist(self, overwriteAll = True):
         file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
             self,
             "Load playlist information",
@@ -149,7 +149,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
             try:
                 self._output_window.outputPrinter.clear()
                 self._output_UI.show()
-                self.load_saved_worker = LoadSavedPlaylistWorker(self.storage, file_path, role)
+                self.load_saved_worker = LoadSavedPlaylistWorker(self.storage, file_path, overwriteAll)
                 self.load_saved_worker.finished.connect(self._update_view)
                 self.load_saved_worker.start()
             except ValueError:
@@ -162,7 +162,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self.add_song_popup.setupUi(self.add_song_ui)
         self.add_song_popup.addSongButton.clicked.connect(lambda: self._add_songs(self.add_song_popup.linksEdit.text()))
         self.add_song_popup.searchButton.clicked.connect(self._search_songs)
-        self.add_song_popup.pushButton.clicked.connect(lambda: self.loadPlaylist(''))
+        self.add_song_popup.pushButton.clicked.connect(lambda: self.loadPlaylist(False))
         self.add_song_ui.exec_()
 
     def _add_songs(self, content):
@@ -300,18 +300,19 @@ class DownloadWorker(QtCore.QThread):
 
 
 class LoadSavedPlaylistWorker(QtCore.QThread):
-    def __init__(self, storage: AppStorage, filePath:str, role: str = 'OverwriteLoad'):
+    def __init__(self, storage: AppStorage, filePath:str, overwriteAll = True):
         super(LoadSavedPlaylistWorker, self).__init__()
 
         self.storage = storage
         self.fp = filePath
-        self.role = role
+        self.role = overwriteAll
 
     def run(self):
-        if self.role == 'OverwriteLoad':
+        if self.role:
             self.storage.vid_info = copy.deepcopy(Playlist().load(self.fp))
         else:
             self.storage.add_entry(copy.deepcopy(Playlist().load(self.fp)))
+
 
 if __name__ == "__main__":
     new_storage = AppStorage()

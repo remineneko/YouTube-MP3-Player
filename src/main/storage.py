@@ -25,7 +25,7 @@ class AppStorage:
         return copy.deepcopy(self._all_videos_info)
 
     @vid_info.setter
-    def vid_info(self, info_obtained: List[Dict]):
+    def vid_info(self, info_obtained: List[MediaMetadata]):
         self._all_videos_info = copy.deepcopy(info_obtained)
 
     def remove_entry(self, entry):
@@ -33,7 +33,7 @@ class AppStorage:
 
     def add_entry(self, entry):
         if type(entry) == list:
-            self._all_videos_info.extend(entry)
+            self._all_videos_info.extend([e for e in entry if e not in self._all_videos_info])
         else:
             if entry not in self.vid_info:
                 self._all_videos_info.append(entry)
