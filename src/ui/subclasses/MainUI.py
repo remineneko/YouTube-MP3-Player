@@ -50,13 +50,29 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
     def is_valid_youtube_url(given_url):
         return bool(re.search(r'^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$', given_url))
 
+    @staticmethod
+    def is_valid_bilibili_url(given_url):
+        return bool(re.search(r'''(?x)
+                    https?://
+                        (?:(?:www|bangumi)\.)?
+                        bilibili\.(?:tv|com)/
+                        (?:
+                            (?:
+                                video/[aA][vV]|
+                                anime/(?P<anime_id>\d+)/play\#
+                            )(?P<id>\d+)|
+                            (s/)?video/[bB][vV](?P<id_bv>[^/?#&]+)
+                        )
+                        (?:/?\?p=(?P<page>\d+))?
+                    ''', given_url))
+
     def tbOutput(self, txt):
         self._output_window.outputPrinter.append(txt)
         QtGui.QGuiApplication.processEvents()
 
     def url_loading(self, input_url):
-        if not self.is_valid_youtube_url(input_url): # bilibili support will come later, please wait for it Rem :p
-            QtWidgets.QMessageBox.warning(self.LoadButton,'Warning','Please put in a proper YouTube video/playlist url')
+        if not self.is_valid_youtube_url(input_url) and not self.is_valid_bilibili_url(input_url): # bilibili support will come later, please wait for it Rem :p
+            QtWidgets.QMessageBox.warning(self.LoadButton,'Warning','Please put in a proper YouTube/Bilibili video/playlist url')
         else:
             self._output_window.outputPrinter.clear()
             self._output_UI.show()
