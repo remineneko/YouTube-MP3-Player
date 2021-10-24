@@ -126,6 +126,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
                     QtWidgets.QMessageBox.warning(self.playButton, 'Warning',
                                           'Another instance of the player is running. Please close it.')
                 else:
+                    self.play_music_UI = Player.Player(self.storage)
                     self.play_music_UI.show()
             except Exception as e:
                 self.play_music_UI = Player.Player(self.storage)
