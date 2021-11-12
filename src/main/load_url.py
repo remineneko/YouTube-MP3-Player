@@ -29,8 +29,9 @@ class LoadURL:
 
 if __name__ == "__main__":
     norm_url = "https://youtu.be/ETGWiArNaO0"
+    norm_url1 = 'https://www.youtube.com/watch?v=9R80DUsixGg'
     playlist_url = "https://www.youtube.com/watch?v=O6vqvlHwkxk&list=PLj3JxVDwUCBlJEZ33x5vSjCCEnJImg1js"
     ns = AppStorage()
-    LoadURL(norm_url, ns)
-    print(ns.vid_info[0].to_dict())
-    LoadURL(playlist_url, ns)
+    LoadURL(norm_url1, ns)
+    print(ns.vid_info[0].chapters)
+    # LoadURL(playlist_url, ns)

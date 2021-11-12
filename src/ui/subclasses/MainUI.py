@@ -71,7 +71,7 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         QtGui.QGuiApplication.processEvents()
 
     def url_loading(self, input_url):
-        if not self.is_valid_youtube_url(input_url) and not self.is_valid_bilibili_url(input_url): # bilibili support will come later, please wait for it Rem :p
+        if not self.is_valid_youtube_url(input_url) and not self.is_valid_bilibili_url(input_url):
             QtWidgets.QMessageBox.warning(self.LoadButton,'Warning','Please put in a proper YouTube/Bilibili video/playlist url')
         else:
             self._output_window.outputPrinter.clear()
