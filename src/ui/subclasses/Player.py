@@ -237,7 +237,7 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
         if available_chapters is None:
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Warning)
-            msg.setText("No chapters are available")
+            msg.setText("No chapters are available for {}".format(item_data.title))
             # msg.setInformativeText('No Chapter ')
             msg.setWindowTitle("Warning")
             msg.exec_()
