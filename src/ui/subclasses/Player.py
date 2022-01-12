@@ -13,11 +13,13 @@ from src.ui.generated.PlayScreen import Ui_PlayerWindow
 from settings import *
 
 import datetime
+import random
 
 
 class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
 
     _DEFAULT_VOLUME = 25
+    _SHUFFLE_AS_YOU_GO_MODE = 0
 
     def __init__(self, storage: AppStorage, parent = None):
         super(Player, self).__init__(parent)
@@ -62,7 +64,7 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
         self.playButton.clicked.connect(self.play)
         self.stopButton.clicked.connect(self.stop)
         self.backPlayButton.clicked.connect(self.back)
-        self.fowardPlayButton.clicked.connect(self.foward)
+        self.fowardPlayButton.clicked.connect(self.forward)
         self.repeatButton.clicked.connect(self.repeat)
         self.shuffleButton.clicked.connect(self.shuffle)
 
@@ -94,19 +96,26 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
         if not self.first_song_played:
             self._change_media()
             self.first_song_played = True
+            self.song_playing = True
 
         if not self.song_playing:
             self.player.play()
             self.nowPlaying.setText("Now Playing: {}".format(self.storage.now_playing[self.current_play_pos].title))
-            self.playButton.setText("Play")
-            self.song_playing = True
+            self._set_song_playing_state(True)
         else:
             self._pause()
 
     def _pause(self):
-        self.song_playing = False
-        self.playButton.setText("Pause")
+        self._set_song_playing_state(False)
         self.player.pause()
+
+    def _set_song_playing_state(self, now_playing = True):
+        self.song_playing = now_playing
+        if now_playing:
+            state = "Play"
+        else:
+            state = "Pause"
+        self.playButton.setText(state)
 
     def stop(self):
         self.song_playing = False
@@ -118,15 +127,23 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
             self.song_playing = False
             self.play()
         else:
-            self.set_playlist_pos(self.current_play_pos - 1)
+            if self.shuffle_state and self.current_play_state != QMediaPlaylist.CurrentItemOnce:
+                next_song_pos = self._sayg("backward")
+                self.set_playlist_pos(next_song_pos)
+            else:
+                self.set_playlist_pos(self.current_play_pos - 1)
             self.song_playing = False
             self.play()
 
-    def foward(self):
+    def forward(self):
         if self.current_play_pos >= self.playlist.mediaCount() - 1:
             pass
         else:
-            self.set_playlist_pos(self.current_play_pos + 1)
+            if self.shuffle_state and self.current_play_state != QMediaPlaylist.CurrentItemOnce:
+                next_song_pos = self._sayg("forward")
+                self.set_playlist_pos(next_song_pos)
+            else:
+                self.set_playlist_pos(self.current_play_pos + 1)
             self.song_playing = False
             self.play()
 
@@ -159,6 +176,14 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
             self.shuffleButton.setText("Shuffle")
             self.playlist.setPlaybackMode(self.current_play_state)
 
+    def _sayg(self, operation = "forward"): # shuffle as you go, options: forward, backward
+        remaining_songs = [i for i in range(len(self.storage.now_playing)) if i != self.cur_play_pos]
+        random.shuffle(remaining_songs)
+        if operation == 'forward':
+            return remaining_songs[0]
+        elif operation == 'backward':
+            return remaining_songs[len(self.storage.now_playing) - 1]
+
     def change_status(self, status):
         if status == QMediaPlayer.EndOfMedia:
             if self.current_play_pos != self.playlist.mediaCount() - 1:
@@ -173,11 +198,10 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
                 self.song_playing = False
                 self.player.stop()
 
-    def dc_evt(self, index):
+    def dc_evt(self, index): # double-click event, NOT disconnect event. ples. :b
         self.set_playlist_pos(index.row())
-        if not self.first_song_played:
-            self._change_media()
-            self.first_song_played = True
+        if self.playButton.text() == "Pause":
+            self.playButton.setText("Play")
         self.player.play()
 
     def _change_media(self):
@@ -218,17 +242,23 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
             try:
                 item = source.itemAt(event.pos())
             except Exception as e:
-                print(f"No item selected {e}")
+                item = None
 
-            if choice == chapter_act:
+            # if choice == chapter_act and item is not None and self.queueList.indexFromItem(item) == self.current_play_pos:
+            #
+            if item is not None:
                 self._view_chapters(item)
+            # elif self.queueList.selectionModel().selectedIndexes()[0] != self.current_play_pos:
+            #     msg = QtWidgets.QMessageBox()
+            #     msg.setIcon(QtWidgets.QMessageBox.Warning)
+            #     msg.setText("Cannot view chapters of songs that are not playing.")
+            #     # msg.setInformativeText('No Chapter ')
+            #     msg.setWindowTitle("Warning")
+            #     msg.exec_()
             return True
         elif event.type() == QtCore.QEvent.MouseButtonDblClick and source is self.queueList:
             self.dc_evt(source.currentIndex())
         return super(QtWidgets.QMainWindow, self).eventFilter(source, event)
-
-    def _pl_song_contextMenu(self, curQueueItem):
-        pass
 
     def _view_chapters(self, cur_item:QtWidgets.QListWidgetItem):
         item_data: MediaMetadata = cur_item.data(QtCore.Qt.UserRole)
@@ -280,16 +310,6 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
             self.currentTime.setText('{}/{}'.format(converted_pos, converted_time))
             self.player.play()
             self.song_playing = True
-
-
-
-
-
-
-
-
-
-
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.player.stop()

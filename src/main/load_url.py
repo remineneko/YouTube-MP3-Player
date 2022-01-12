@@ -1,8 +1,13 @@
+import yt_dlp
 from yt_dlp import YoutubeDL
 from src.main.storage import AppStorage
 from src.main.media_metadata import MediaMetadata
 from typing import Dict
 from copy import deepcopy
+
+
+class LoadError(Exception):
+    pass
 
 
 class LoadURL:
@@ -20,11 +25,14 @@ class LoadURL:
             self.storage.vid_info = deepcopy(self.obtained_data)
 
     def _load_info(self):
-        obtained_data : Dict = self.inst.extract_info(self._url, download = False)
-        if self._url_type == 'video':
-            return [MediaMetadata(obtained_data)]
-        else:
-            return [MediaMetadata(i) for i in obtained_data['entries']]
+        try:
+            obtained_data : Dict = self.inst.extract_info(self._url, download = False)
+            if self._url_type == 'video':
+                return [MediaMetadata(obtained_data)]
+            else:
+                return [MediaMetadata(i) for i in obtained_data['entries']]
+        except yt_dlp.utils.DownloadError:
+            raise LoadError("The media from the link provided cannot be loaded")
 
 
 if __name__ == "__main__":
