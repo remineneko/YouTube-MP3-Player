@@ -4,7 +4,7 @@ import copy
 from PyQt5 import QtWidgets, QtGui, QtCore
 
 from src.main.media_metadata import MediaMetadata
-from src.ui.generated import MainScreen, PlayOptions, AddSongs, SettingsUI, SearchOptionsUI, InfoWindow
+from src.ui.generated import MainScreen, PlayOptions, AddSongs, SettingsUI, SearchOptionsUI, InfoWindow, InfoDialog
 from src.ui.generated.SmallMetadata import Ui_Metadata
 from src.ui.subclasses import Player, SearchSongs
 
@@ -12,8 +12,10 @@ from src.main.load_url import LoadURL, LoadError
 from src.main.storage import AppStorage
 from src.main.cur_playlist_data import Playlist
 from src.main.download_music import download_music
+from src.main.link_verification import is_valid_link
+from src.main.exceptions import *
 
-import shutil, sys
+import shutil, sys, time
 
 
 class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
@@ -46,32 +48,16 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
         self._output_window = InfoWindow.Ui_MainWindow()
         self._output_window.setupUi(self._output_UI)
 
-    @staticmethod
-    def is_valid_youtube_url(given_url):
-        return bool(re.search(r'^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$', given_url))
-
-    @staticmethod
-    def is_valid_bilibili_url(given_url):
-        return bool(re.search(r'''(?x)
-                    https?://
-                        (?:(?:www|bangumi)\.)?
-                        bilibili\.(?:tv|com)/
-                        (?:
-                            (?:
-                                video/[aA][vV]|
-                                anime/(?P<anime_id>\d+)/play\#
-                            )(?P<id>\d+)|
-                            (s/)?video/[bB][vV](?P<id_bv>[^/?#&]+)
-                        )
-                        (?:/?\?p=(?P<page>\d+))?
-                    ''', given_url))
+        self._output_dialog_UI = QtWidgets.QDialog()
+        self._output_dialog = InfoDialog.Ui_InfoDialog()
+        self._output_dialog.setupUi(self._output_dialog_UI)
 
     def tbOutput(self, txt):
         self._output_window.outputPrinter.append(txt)
         QtGui.QGuiApplication.processEvents()
 
     def url_loading(self, input_url):
-        if not self.is_valid_youtube_url(input_url) and not self.is_valid_bilibili_url(input_url):
+        if not is_valid_link(input_url, "youtube") and not is_valid_link(input_url, "bilibili"):
             QtWidgets.QMessageBox.warning(self.LoadButton,'Warning','Please put in a proper YouTube/Bilibili video/playlist url')
         else:
             self._output_window.outputPrinter.clear()
@@ -171,23 +157,11 @@ class MainMenu(QtWidgets.QMainWindow, MainScreen.Ui_MainWindow):
             "JSON (*.json)"
         )
         if len(file_path) != 0:
-            try:
-                self._output_window.outputPrinter.clear()
-                self._output_UI.show()
-                try:
-                    self.load_saved_worker = LoadSavedPlaylistWorker(self.storage, file_path, overwriteAll)
-                    self.load_saved_worker.finished.connect(self._update_view)
-                    self.load_saved_worker.start()
-                except LoadError:
-                    msg = QtWidgets.QMessageBox()
-                    msg.setIcon(QtWidgets.QMessageBox.Warning)
-                    msg.setText("Failed to load media from the provided URL")
-                    # msg.setInformativeText('No Chapter ')
-                    msg.setWindowTitle("Warning")
-                    msg.exec_()
-            except ValueError:
-                QtWidgets.QMessageBox.warning(self.pushButton, 'Warning',
-                                              'Please load the correct .json file')
+            self._output_window.outputPrinter.clear()
+            self._output_UI.show()
+            self.load_saved_worker = LoadSavedPlaylistWorker(self.storage, file_path, overwriteAll)
+            self.load_saved_worker.finished.connect(self._update_view)
+            self.load_saved_worker.start()
 
     def addSong(self):
         self.add_song_ui = QtWidgets.QDialog()
@@ -344,15 +318,24 @@ class LoadSavedPlaylistWorker(QtCore.QThread):
         if self.role:
             try:
                 self.storage.vid_info = copy.deepcopy(Playlist().load(self.fp))
-            except LoadError:
-                msg = QtWidgets.QMessageBox()
-                msg.setIcon(QtWidgets.QMessageBox.Warning)
-                msg.setText("Failed to load media from the provided URL")
-                # msg.setInformativeText('No Chapter ')
-                msg.setWindowTitle("Warning")
-                msg.exec_()
+            except LoadError as e:
+                create_new_msg_box(str(e), "Warning")
+            except IncorrectJSONFileError:
+                create_new_msg_box(f"The JSON file provided is not in correct format. Please try with a different file", "Warning")
+            except IncorrectFileTypeError:
+                create_new_msg_box("The provided file is not JSON. Please try with a different file", "Warning")
         else:
             self.storage.add_entry(copy.deepcopy(Playlist().load(self.fp)))
+
+
+def create_new_msg_box(send_msg:str, win_title:str):
+    msg = QtWidgets.QMessageBox()
+    msg.setIcon(QtWidgets.QMessageBox.Warning)
+    msg.setText(send_msg)
+    # msg.setInformativeText('No Chapter ')
+    msg.setWindowTitle(win_title)
+    time.sleep(2)
+    msg.exec_()
 
 
 if __name__ == "__main__":

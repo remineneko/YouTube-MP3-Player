@@ -93,12 +93,15 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
         # if len(self.queueList.selectedItems()) == 1:
         #     self.set_playlist_pos(self.queueList.row(self.queueList.currentItem()))
 
-        if not self.first_song_played:
-            self._change_media()
-            self.first_song_played = True
-            self.song_playing = True
+        # if not self.first_song_played:
+        #
+        #     self.first_song_played = True
+        #     self._set_song_playing_state()
+        #     self.song_playing = True
+        #     self.player.play()
 
         if not self.song_playing:
+            self._change_media()
             self.player.play()
             self.nowPlaying.setText("Now Playing: {}".format(self.storage.now_playing[self.current_play_pos].title))
             self._set_song_playing_state(True)
@@ -112,9 +115,9 @@ class Player(QtWidgets.QMainWindow, Ui_PlayerWindow):
     def _set_song_playing_state(self, now_playing = True):
         self.song_playing = now_playing
         if now_playing:
-            state = "Play"
-        else:
             state = "Pause"
+        else:
+            state = "Play"
         self.playButton.setText(state)
 
     def stop(self):

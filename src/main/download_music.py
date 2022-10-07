@@ -1,9 +1,9 @@
 from yt_dlp import YoutubeDL
-from typing import List
 from settings import *
 from src.main.alter_title import alter_title
 from src.main.media_metadata import MediaMetadata
 from src.main.storage import AppStorage
+
 
 def download_music(storage:AppStorage):
     info_list = storage.now_playing

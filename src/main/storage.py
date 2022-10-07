@@ -6,19 +6,10 @@ from src.main.config import *
 
 class AppStorage:
     def __init__(self, config_path = os.path.join(DATA_FOLDER,'config.ini')):
-        self._given_url = None
         self._all_videos_info : List[MediaMetadata] = []
         self._config_path = config_path
         self.now_playing : List[MediaMetadata] = []
         self.temp_search_storage = []
-
-    @property
-    def url(self) -> str:
-        return self._given_url
-
-    @url.setter
-    def url(self, new_url:str):
-        self._given_url = new_url
 
     @property
     def vid_info(self) -> List[MediaMetadata]:

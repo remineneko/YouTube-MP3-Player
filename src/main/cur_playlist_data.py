@@ -1,7 +1,7 @@
 from typing import List
 from src.main.media_metadata import MediaMetadata
 from src.main.load_url import LoadURL
-import os
+from src.main.exceptions import *
 import json
 
 
@@ -14,16 +14,19 @@ class Playlist:
         with open(file_loc, 'w') as f:
             json.dump(self._data, f)
 
-    def load(self, file_loc:str):
+    @staticmethod
+    def load(file_loc:str):
         with open(file_loc, 'r') as f:
             if file_loc.split(".")[1].lower() == 'json':
                 base_data = json.load(f)
                 try:
                     result = [LoadURL(i['url']).obtained_data[0] for i in base_data]
-                except KeyError:
-                    raise ValueError("This is not the correct outputted json file")
-                return result
+                    return result
+                except LoadError as e:
+                    raise LoadError(str(e))
+                except Exception:
+                    raise IncorrectJSONFileError("This is not the correctly outputted json file")
             else:
-                raise ValueError("Given file must be a JSON file")
+                raise IncorrectFileTypeError("Given file must be a JSON file")
 
 

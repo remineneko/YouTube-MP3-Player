@@ -77,7 +77,7 @@ def main():
     # Now, Main Window should be loaded now.
     # And now we load the window.
     app = QtWidgets.QApplication(sys.argv)
-    app.setApplicationName("Benchmark and Stress")
+    app.setApplicationName("YT to MP3 player")
     # app.setWindowIcon(QtGui.QIcon(YANFEI_SMUG))
     # MainWindow = QtWidgets.QMainWindow()
     # ui = Ui_MainWindow(new_storage)
